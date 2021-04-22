@@ -1,0 +1,1 @@
+This project is for fun and experimentation.  I am playing with colors across a grid, and how they can spread to adjacencies by a variety of rules.
