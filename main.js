@@ -28,15 +28,18 @@ const initBoxes = (boxSize, displayElement, boxData, boxDataStage) => {
   const displayWidth = displayElement.clientWidth
   const displayHeight = displayElement.clientHeight
 
-  for (let row = 0; row < Math.ceil(displayHeight / boxSize); row++) {
+  const height = Math.ceil(displayHeight / boxSize)
+  const width = Math.ceil(displayWidth / boxSize)
+
+  for (let row = 0; row < height; row++) {
     boxData.push([])
     boxDataStage.push([])
-    for (let col = 0; col < Math.ceil(displayWidth / boxSize); col++) {
+    for (let col = 0; col < width; col++) {
       const span = document.createElement('span')
       const red = randInt(0, 255)
       const green = randInt(0, 255)
       const blue = randInt(0, 255)
-      const spanId = `box-${row}-${col}`
+      const spanId = `box-${displayElement.id}-${row}-${col}`
       boxData[row].push(new Box(red, green, blue, spanId))
       boxDataStage[row].push(new Box(red, green, blue, spanId))
 
@@ -61,12 +64,13 @@ const enforceColorBoundsOnBox = (box) => {
   if (box.blue > 255) box.blue = 255
 }
 
-const colorDrift = () => {
-  return randInt(-5, 5)
+const colorDrift = (factor) => {
+  return randInt(-factor, factor)
 }
 
-const startLoop = (boxData, boxDataStage, frameDelay) => {
-  setInterval(() => {
+// returns ref to its interval to be canceled if a new loop is started
+const startLoop = (boxData, boxDataStage, colorDriftFactor, frameDelay) => {
+  return setInterval(() => {
     // general strategy: READ from boxData to WRITE to boxDatastage
     // fuss around and customize values in boxDataStage, maintaining frame-wise original,
     // pristine state in boxData; when done, write colors from boxDateStage to DOM, as well
@@ -85,9 +89,9 @@ const startLoop = (boxData, boxDataStage, frameDelay) => {
     // step: fuss with stage data
     boxData.forEach((row, r) => {
       row.forEach((currentBox, c) => {
-        boxDataStage[r][c].red = currentBox.red + colorDrift()
-        boxDataStage[r][c].green = currentBox.green + colorDrift()
-        boxDataStage[r][c].blue = currentBox.blue + colorDrift()
+        boxDataStage[r][c].red = currentBox.red + colorDrift(colorDriftFactor)
+        boxDataStage[r][c].green = currentBox.green + colorDrift(colorDriftFactor)
+        boxDataStage[r][c].blue = currentBox.blue + colorDrift(colorDriftFactor)
       })
     })
 
@@ -96,16 +100,18 @@ const startLoop = (boxData, boxDataStage, frameDelay) => {
       row.forEach((currentBox, c) => {
         document.getElementById(currentBox.spanId).style.backgroundColor =
           `rgb(${currentBox.red}, ${currentBox.green}, ${currentBox.blue})`
-        boxData[r][c].red = currentBox.red + colorDrift()
-        boxData[r][c].green = currentBox.green + colorDrift()
-        boxData[r][c].blue = currentBox.blue + colorDrift()
+        boxData[r][c].red = currentBox.red
+        boxData[r][c].green = currentBox.green
+        boxData[r][c].blue = currentBox.blue
         })
     })
   }, frameDelay)
 }
 
+// returns ref to its interval for cancelation in case of a new loop start
 const colorClouds = (args = {}) => {
   const boxSize = args.boxSize || 20
+  const colorDriftFactor = args.colorDriftFactor || 5
   const elementId = args.elementId || 'color-clouds'
   const frameDelay = args.frameDelay || 100
 
@@ -121,18 +127,14 @@ const colorClouds = (args = {}) => {
     return error(`this feature only available for use with DOM elements with the 'relative' position style`)
   }
 
+  // clean target element's content
+  displayElement.innerHTML = ""
+
   const boxData = []
   const boxDataStage = []
 
   initBoxes(boxSize, displayElement, boxData, boxDataStage)
 
-  startLoop(boxData, boxDataStage, frameDelay)
+  // return ref to the loop interval from setInterval
+  return startLoop(boxData, boxDataStage, colorDriftFactor, frameDelay)
 }
-
-if(document.readyState === 'complete') {
-  colorClouds({ boxSize: 100 })
-} else {
-  window.addEventListener('load', () => {
-    colorClouds({ boxSize: 100 })
-  })  
-}  
