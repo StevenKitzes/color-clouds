@@ -25,6 +25,7 @@
       }
       .control-line {
         margin: 4px 0;
+        position: relative;
       }
       .controls {
         border: 1px solid darkgray;
@@ -33,6 +34,28 @@
         flex-grow: 1;
         padding-left: 1em;
         position: relative;
+      }
+      .help {
+        align-items: center;
+        border: 1px solid white;
+        border-radius: 1em;
+        cursor: default;
+        display: flex;
+        font-weight: 800;
+        height: 1.15em;
+        justify-content: center;
+        left: 15em;
+        position: absolute;
+        top: 0;
+        width: 1.15em;
+      }
+      .helpText {
+        border: 1px solid lightgray;
+        border-radius: 1em;
+        height: 4em;
+        margin: 0.5em 0.5em 0.25em 0.5em;
+        padding: 0.5em;
+        width: 15em;
       }
       .root {
         border: 1px solid lightgray;
@@ -60,21 +83,30 @@
       </div>
       <div class="controls">
         <div class="control-line">
-          Box size: <input type='text' name='boxSize' id='boxSize' size=4 value='20' autocomplete='off'>
+          Box size:
+          <input type='text' name='boxSize' id='boxSize' size=4 value='20' autocomplete='off'>
+          <span class='help' id='boxSizeHelp'>?</span>
         </div>
         <div class="control-line">
-          Color drift: <input type='text' name='colorDriftFactor' id='colorDriftFactor' size=4 value='5' autocomplete='off'>
+          Color drift:
+          <input type='text' name='colorDriftFactor' id='colorDriftFactor' size=4 value='5' autocomplete='off'>
+          <span class='help' id='colorDriftFactorHelp'>?</span>
         </div>
         <div class="control-line">
-          Frame delay: <input type='text' name='frameDelay' id='frameDelay' size=4 value='100' autocomplete='off'>
+          Frame delay:
+          <input type='text' name='frameDelay' id='frameDelay' size=4 value='100' autocomplete='off'>
+          <span class='help' id='frameDelayHelp'>?</span>
         </div>
         <div class="control-line">
-          Target: <select name='target' id='target' value='sample1' autocomplete='off'>
+          Target:
+          <select name='target' id='target' value='sample1' autocomplete='off'>
             <option value='sample1'>Red box</option>
             <option value='sample2'>Green box</option>
             <option value='sample3'>Blue box</option>
           </select>
+          <span class='help' id='targetHelp'>?</span>
         </div>
+        <div class='helpText' id='helpText'>Hint: hover over help icons to learn more!</div>
         <button id='start'>Start</button> <button id='stop'>Stop</button>
       </div>
     </div>
@@ -112,7 +144,31 @@
             case 'sample3': interval3 = interval; break;
           }
         })
+        document.getElementById('boxSizeHelp').addEventListener('mouseover', () => {
+          showHelpText('how many pixels tall/wide should each color box be?')
+        })
+        document.getElementById('colorDriftFactorHelp').addEventListener('mouseover', () => {
+          showHelpText('how much should the color of each box evolve, each frame?')
+        })
+        document.getElementById('targetHelp').addEventListener('mouseover', () => {
+          showHelpText('which sample space do you want to play in?')
+        })
+        document.getElementById('frameDelayHelp').addEventListener('mouseover', () => {
+          showHelpText('how long between each animation frame in milliseconds?')
+        })
+        document.getElementById('boxSizeHelp').addEventListener('mouseout', resetHelpText)
+        document.getElementById('colorDriftFactorHelp').addEventListener('mouseout', resetHelpText)
+        document.getElementById('targetHelp').addEventListener('mouseout', resetHelpText)
+        document.getElementById('frameDelayHelp').addEventListener('mouseout', resetHelpText)
       }
+
+      const showHelpText = (msg) => {
+        document.getElementById('helpText').innerHTML = `Hint: ${msg}`
+      }
+      const resetHelpText = () => {
+        document.getElementById('helpText').innerHTML = 'Hint: hover over help icons to learn more!'
+      }
+
       if(document.readyState === 'complete') {
         init()
       } else {
