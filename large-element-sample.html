@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<html>
+  <head>
+    <style>
+      body {
+        background-color: black;
+        color: white;
+        margin: 0;
+        padding: 0;
+      }
+      .sample {
+        height: 100vh;
+        left: 0;
+        overflow: hidden;
+        position: relative;
+        top: 0;
+        width: 100vw;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sample" id="color-clouds"></div>
+    <script type='text/javascript' src='main.js'></script>
+    <script type='text/javascript'>
+      function init() {
+        colorClouds({
+          bloomFactor: 3,
+          bloomInitial: 200,
+          bloomOdds: 100,
+          bloomSpreadOdds: 30,
+          boxSize: 15,
+          colorDriftFactor: 5,
+          elementId: 'color-clouds',
+          frameDelay: 100,
+        })
+      }
+      if(document.readyState === 'complete') {
+        init()
+      } else {
+        window.addEventListener('load', () => {
+          init()
+        })
+      }
+    </script>
+  </body>
+</html>
