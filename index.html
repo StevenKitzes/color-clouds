@@ -83,6 +83,26 @@
       </div>
       <div class="controls">
         <div class="control-line">
+          Bloom factor:
+          <input type='text' name='bloomFactor' id='bloomFactor' size=4 value='3' autocomplete='off'>
+          <span class='help' id='bloomFactorHelp'>?</span>
+        </div>
+        <div class="control-line">
+          Bloom initial:
+          <input type='text' name='bloomInitial' id='bloomInitial' size=4 value='100' autocomplete='off'>
+          <span class='help' id='bloomInitialHelp'>?</span>
+        </div>
+        <div class="control-line">
+          Bloom odds:
+          <input type='text' name='bloomOdds' id='bloomOdds' size=4 value='100' autocomplete='off'>
+          <span class='help' id='bloomOddsHelp'>?</span>
+        </div>
+        <div class="control-line">
+          Bloom spread odds:
+          <input type='text' name='bloomSpreadOdds' id='bloomSpreadOdds' size=4 value='30' autocomplete='off'>
+          <span class='help' id='bloomSpreadOddsHelp'>?</span>
+        </div>
+        <div class="control-line">
           Box size:
           <input type='text' name='boxSize' id='boxSize' size=4 value='20' autocomplete='off'>
           <span class='help' id='boxSizeHelp'>?</span>
@@ -133,6 +153,10 @@
             case 'sample3': if(interval3) clearInterval(interval3); break;
           }
           const interval = colorClouds({
+            bloomFactor: parseInt(document.getElementById('bloomFactor').value),
+            bloomInitial: parseInt(document.getElementById('bloomInitial').value),
+            bloomOdds: parseInt(document.getElementById('bloomOdds').value),
+            bloomSpreadOdds: parseInt(document.getElementById('bloomSpreadOdds').value),
             boxSize: parseInt(document.getElementById('boxSize').value),
             colorDriftFactor: parseInt(document.getElementById('colorDriftFactor').value),
             elementId: target,
@@ -143,6 +167,18 @@
             case 'sample2': interval2 = interval; break;
             case 'sample3': interval3 = interval; break;
           }
+        })
+        document.getElementById('bloomFactorHelp').addEventListener('mouseover', () => {
+          showHelpText('how heavily should bloom affect weighting when averaging box neighbor colors?')
+        })
+        document.getElementById('bloomInitialHelp').addEventListener('mouseover', () => {
+          showHelpText('how long should bloom last?')
+        })
+        document.getElementById('bloomOddsHelp').addEventListener('mouseover', () => {
+          showHelpText('what are the odds a new bloom seed is added each animation frame?')
+        })
+        document.getElementById('bloomSpreadOddsHelp').addEventListener('mouseover', () => {
+          showHelpText('what are the odds a non-bloom box absorbs neighboring bloom characteristic?')
         })
         document.getElementById('boxSizeHelp').addEventListener('mouseover', () => {
           showHelpText('how many pixels tall/wide should each color box be?')
