@@ -1,4 +1,4 @@
-const DEBUG = true
+let DEBUG = true
 
 const log = (msg) => {
   if (DEBUG) console.log(msg)
@@ -22,6 +22,7 @@ function Box(red, green, blue, bloom, spanId) {
   this.blue = blue
   this.bloom = bloom
   this.spanId = spanId
+  this.originColor = null
 }
 
 // set up DOM with boxes
@@ -105,18 +106,23 @@ const startLoop = (bloomFactor, bloomInitial, bloomOdds, bloomSpreadOdds, boxDat
       boxDataStage[y][x].green = randInt(0, 255)
       boxDataStage[y][x].blue = randInt(0, 255)
       boxDataStage[y][x].bloom = bloomInitial
+      boxDataStage[y][x].originColor = {
+        red: boxDataStage[y][x].red,
+        green: boxDataStage[y][x].green,
+        blue: boxDataStage[y][x].blue,
+      }
     }
     
     // step: apply bloom/averaging rules
     boxDataStage.forEach((row, r) => {
       row.forEach((box, c) => {
-        // If current has bloom, avg w self and other higher bloom neightbors and reduce bloom
+        // If current has bloom, avg w self's origin and other higher bloom neightbors and reduce bloom
         if (box.bloom > 0) {
-          document.getElementById(box.spanId).innerHTML = 'B'
+          if (DEBUG) document.getElementById(box.spanId).innerHTML = 'B'
           const avg = {
-            red: box.red,
-            green: box.green,
-            blue: box.blue,
+            red: box.originColor.red,
+            green: box.originColor.green,
+            blue: box.originColor.blue,
             count: 1
           }
           if (c > 0 && boxData[r][c-1].bloom >= box.bloom) {
@@ -151,10 +157,13 @@ const startLoop = (bloomFactor, bloomInitial, bloomOdds, bloomSpreadOdds, boxDat
           box.green = avg.green / avg.count
           box.blue = avg.blue / avg.count
           box.bloom--
+          if (box.bloom < 1) {
+            box.originColor = null
+          }
         }
         // If box lacks bloom, avg w all neighbors; weight bloom neighbors; maybe catch their bloom
         else if (box.bloom < 1) {
-          document.getElementById(box.spanId).innerHTML = ''
+          if (DEBUG) document.getElementById(box.spanId).innerHTML = ''
           const avg = {
             red: box.red,
             green: box.green,
@@ -162,13 +171,17 @@ const startLoop = (bloomFactor, bloomInitial, bloomOdds, bloomSpreadOdds, boxDat
             count: 1
           }
           let maxNeighborBloom = 0
+          let newOrigin = null
           if (c > 0) {
             const other = boxData[r][c-1]
             avg.red += other.red * (other.bloom > 0 ? bloomFactor : 1)
             avg.green += other.green * (other.bloom > 0 ? bloomFactor : 1)
             avg.blue += other.blue * (other.bloom > 0 ? bloomFactor : 1)
             avg.count += (other.bloom > 0 ? bloomFactor : 1)
-            maxNeighborBloom = Math.max(maxNeighborBloom, other.bloom)
+            if (other.bloom > maxNeighborBloom) {
+              maxNeighborBloom = other.bloom
+              newOrigin = other.originColor
+            }
           }
           if (c < row.length - 1) {
             const other = boxData[r][c+1]
@@ -176,7 +189,10 @@ const startLoop = (bloomFactor, bloomInitial, bloomOdds, bloomSpreadOdds, boxDat
             avg.green += other.green * (other.bloom > 0 ? bloomFactor : 1)
             avg.blue += other.blue * (other.bloom > 0 ? bloomFactor : 1)
             avg.count += (other.bloom > 0 ? bloomFactor : 1)
-            maxNeighborBloom = Math.max(maxNeighborBloom, other.bloom)
+            if (other.bloom > maxNeighborBloom) {
+              maxNeighborBloom = other.bloom
+              newOrigin = other.originColor
+            }
           }
           if (r > 0) {
             const other = boxData[r-1][c]
@@ -184,7 +200,10 @@ const startLoop = (bloomFactor, bloomInitial, bloomOdds, bloomSpreadOdds, boxDat
             avg.green += other.green * (other.bloom > 0 ? bloomFactor : 1)
             avg.blue += other.blue * (other.bloom > 0 ? bloomFactor : 1)
             avg.count += (other.bloom > 0 ? bloomFactor : 1)
-            maxNeighborBloom = Math.max(maxNeighborBloom, other.bloom)
+            if (other.bloom > maxNeighborBloom) {
+              maxNeighborBloom = other.bloom
+              newOrigin = other.originColor
+            }
           }
           if (r < boxDataStage.length - 1) {
             const other = boxData[r+1][c]
@@ -192,13 +211,17 @@ const startLoop = (bloomFactor, bloomInitial, bloomOdds, bloomSpreadOdds, boxDat
             avg.green += other.green * (other.bloom > 0 ? bloomFactor : 1)
             avg.blue += other.blue * (other.bloom > 0 ? bloomFactor : 1)
             avg.count += (other.bloom > 0 ? bloomFactor : 1)
-            maxNeighborBloom = Math.max(maxNeighborBloom, other.bloom)
+            if (other.bloom > maxNeighborBloom) {
+              maxNeighborBloom = other.bloom
+              newOrigin = other.originColor
+            }
           }
           box.red = avg.red / avg.count
           box.green = avg.green / avg.count
           box.blue = avg.blue / avg.count
           if (randInt(0, bloomSpreadOdds) === 0) {
             box.bloom = Math.max(maxNeighborBloom - 1, 0)
+            if (box.bloom > 0) box.originColor = newOrigin
           }
         }
       })
@@ -227,6 +250,7 @@ const startLoop = (bloomFactor, bloomInitial, bloomOdds, bloomSpreadOdds, boxDat
         boxData[r][c].green = currentBox.green
         boxData[r][c].blue = currentBox.blue
         boxData[r][c].bloom = currentBox.bloom
+        boxData[r][c].originColor = currentBox.originColor
         })
     })
   }, frameDelay)
@@ -242,6 +266,7 @@ const colorClouds = (args = {}) => {
   const colorDriftFactor = args.colorDriftFactor || 5
   const elementId = args.elementId || 'color-clouds'
   const frameDelay = args.frameDelay || 100
+  DEBUG = args.debug || false
 
   const displayElement = document.getElementById(elementId)
   if (!displayElement) {
