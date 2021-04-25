@@ -88,28 +88,33 @@
       </div>
       <div class="controls">
         <div class="control-line">
+          Bloom decay max:
+          <input type='text' name='bloomDecayMax' id='bloomDecayMax' size=4 value='5' autocomplete='off'>
+          <span class='help' id='bloomDecayMaxHelp'>?</span>
+        </div>
+        <div class="control-line">
           Bloom factor:
           <input type='text' name='bloomFactor' id='bloomFactor' size=4 value='3' autocomplete='off'>
           <span class='help' id='bloomFactorHelp'>?</span>
         </div>
         <div class="control-line">
           Bloom initial:
-          <input type='text' name='bloomInitial' id='bloomInitial' size=4 value='100' autocomplete='off'>
+          <input type='text' name='bloomInitial' id='bloomInitial' size=4 value='250' autocomplete='off'>
           <span class='help' id='bloomInitialHelp'>?</span>
         </div>
         <div class="control-line">
           Bloom odds:
-          <input type='text' name='bloomOdds' id='bloomOdds' size=4 value='100' autocomplete='off'>
+          <input type='text' name='bloomOdds' id='bloomOdds' size=4 value='75' autocomplete='off'>
           <span class='help' id='bloomOddsHelp'>?</span>
         </div>
         <div class="control-line">
           Bloom spread odds:
-          <input type='text' name='bloomSpreadOdds' id='bloomSpreadOdds' size=4 value='30' autocomplete='off'>
+          <input type='text' name='bloomSpreadOdds' id='bloomSpreadOdds' size=4 value='20' autocomplete='off'>
           <span class='help' id='bloomSpreadOddsHelp'>?</span>
         </div>
         <div class="control-line">
           Box size:
-          <input type='text' name='boxSize' id='boxSize' size=4 value='20' autocomplete='off'>
+          <input type='text' name='boxSize' id='boxSize' size=4 value='10' autocomplete='off'>
           <span class='help' id='boxSizeHelp'>?</span>
         </div>
         <div class="control-line">
@@ -159,6 +164,7 @@
             case 'sample3': if(interval3) clearInterval(interval3); break;
           }
           const interval = colorClouds({
+            bloomDecayMax: parseInt(document.getElementById('bloomDecayMax').value),
             bloomFactor: parseInt(document.getElementById('bloomFactor').value),
             bloomInitial: parseInt(document.getElementById('bloomInitial').value),
             bloomOdds: parseInt(document.getElementById('bloomOdds').value),
@@ -173,6 +179,9 @@
             case 'sample2': interval2 = interval; break;
             case 'sample3': interval3 = interval; break;
           }
+        })
+        document.getElementById('bloomDecayMaxHelp').addEventListener('mouseover', () => {
+          showHelpText('maximum decay when bloom spreads to new boxes (minimum is 1)')
         })
         document.getElementById('bloomFactorHelp').addEventListener('mouseover', () => {
           showHelpText('how heavily should bloom affect weighting when averaging box neighbor colors?')

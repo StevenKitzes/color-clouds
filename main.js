@@ -72,7 +72,7 @@ const colorDrift = (factor) => {
 }
 
 // returns ref to its interval to be canceled if a new loop is started
-const startLoop = (bloomFactor, bloomInitial, bloomOdds, bloomSpreadOdds, boxData, boxDataStage, colorDriftFactor, frameDelay) => {
+const startLoop = (bloomDecayMax, bloomFactor, bloomInitial, bloomOdds, bloomSpreadOdds, boxData, boxDataStage, colorDriftFactor, frameDelay) => {
   return setInterval(() => {
     // general strategy: READ from boxData to WRITE to boxDatastage
     // fuss around and customize values in boxDataStage, maintaining frame-wise original,
@@ -99,7 +99,6 @@ const startLoop = (bloomFactor, bloomInitial, bloomOdds, bloomSpreadOdds, boxDat
 
     // step: seed new blooms
     if (randInt(0, bloomOdds) === 0) {
-      log('bloom!')
       const x = randInt(0, boxDataStage[0].length - 1)
       const y = randInt(0, boxDataStage.length - 1)
       boxDataStage[y][x].red = randInt(0, 255)
@@ -178,7 +177,7 @@ const startLoop = (bloomFactor, bloomInitial, bloomOdds, bloomSpreadOdds, boxDat
             avg.green += other.green * (other.bloom > 0 ? bloomFactor : 1)
             avg.blue += other.blue * (other.bloom > 0 ? bloomFactor : 1)
             avg.count += (other.bloom > 0 ? bloomFactor : 1)
-            if (other.bloom > maxNeighborBloom) {
+            if (other.bloom - bloomDecayMax > maxNeighborBloom) {
               maxNeighborBloom = other.bloom
               newOrigin = other.originColor
             }
@@ -189,7 +188,7 @@ const startLoop = (bloomFactor, bloomInitial, bloomOdds, bloomSpreadOdds, boxDat
             avg.green += other.green * (other.bloom > 0 ? bloomFactor : 1)
             avg.blue += other.blue * (other.bloom > 0 ? bloomFactor : 1)
             avg.count += (other.bloom > 0 ? bloomFactor : 1)
-            if (other.bloom > maxNeighborBloom) {
+            if (other.bloom - bloomDecayMax > maxNeighborBloom) {
               maxNeighborBloom = other.bloom
               newOrigin = other.originColor
             }
@@ -200,7 +199,7 @@ const startLoop = (bloomFactor, bloomInitial, bloomOdds, bloomSpreadOdds, boxDat
             avg.green += other.green * (other.bloom > 0 ? bloomFactor : 1)
             avg.blue += other.blue * (other.bloom > 0 ? bloomFactor : 1)
             avg.count += (other.bloom > 0 ? bloomFactor : 1)
-            if (other.bloom > maxNeighborBloom) {
+            if (other.bloom - bloomDecayMax > maxNeighborBloom) {
               maxNeighborBloom = other.bloom
               newOrigin = other.originColor
             }
@@ -211,7 +210,7 @@ const startLoop = (bloomFactor, bloomInitial, bloomOdds, bloomSpreadOdds, boxDat
             avg.green += other.green * (other.bloom > 0 ? bloomFactor : 1)
             avg.blue += other.blue * (other.bloom > 0 ? bloomFactor : 1)
             avg.count += (other.bloom > 0 ? bloomFactor : 1)
-            if (other.bloom > maxNeighborBloom) {
+            if (other.bloom - bloomDecayMax > maxNeighborBloom) {
               maxNeighborBloom = other.bloom
               newOrigin = other.originColor
             }
@@ -220,7 +219,7 @@ const startLoop = (bloomFactor, bloomInitial, bloomOdds, bloomSpreadOdds, boxDat
           box.green = avg.green / avg.count
           box.blue = avg.blue / avg.count
           if (randInt(0, bloomSpreadOdds) === 0) {
-            box.bloom = Math.max(maxNeighborBloom - 1, 0)
+            box.bloom = Math.max(maxNeighborBloom - randInt(1, bloomDecayMax), 0)
             if (box.bloom > 0) box.originColor = newOrigin
           }
         }
@@ -258,10 +257,11 @@ const startLoop = (bloomFactor, bloomInitial, bloomOdds, bloomSpreadOdds, boxDat
 
 // returns ref to its interval for cancelation in case of a new loop start
 const colorClouds = (args = {}) => {
+  const bloomDecayMax = args.bloomDecayMax || 5
   const bloomFactor = args.bloomFactor || 3
-  const bloomInitial = args.bloomInitial || 100
+  const bloomInitial = args.bloomInitial || 200
   const bloomOdds = args.bloomOdds || 100
-  const bloomSpreadOdds = args.bloomSpreadOdds || 30
+  const bloomSpreadOdds = args.bloomSpreadOdds || 20
   const boxSize = args.boxSize || 20
   const colorDriftFactor = args.colorDriftFactor || 5
   const elementId = args.elementId || 'color-clouds'
@@ -289,5 +289,5 @@ const colorClouds = (args = {}) => {
   initBoxes(boxSize, displayElement, boxData, boxDataStage)
 
   // return ref to the loop interval from setInterval
-  return startLoop(bloomFactor, bloomInitial, bloomOdds, bloomSpreadOdds, boxData, boxDataStage, colorDriftFactor, frameDelay)
+  return startLoop(bloomDecayMax, bloomFactor, bloomInitial, bloomOdds, bloomSpreadOdds, boxData, boxDataStage, colorDriftFactor, frameDelay)
 }
