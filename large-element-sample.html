@@ -24,16 +24,37 @@
     <script type='text/javascript' src='main.js'></script>
     <script type='text/javascript'>
       function init() {
+        // Log options to console for user convenience/reference
+        console.log('URL query string options:')
+        console.log('option: default')
+        console.log('-------------------------')
+        console.log('bloomDecayMax: 5')
+        console.log('bloomFactor: 3')
+        console.log('bloomInitial: 250')
+        console.log('bloomOdds: 75')
+        console.log('bloomSpreadOdds: 20')
+        console.log('boxSize: 15')
+        console.log('colorDriftFactor: 5')
+        console.log('frameDelay: 100')
+
+        const queryString = window.location.search.substr(1)
+        const queryParamStrings = queryString.split('&')
+        const query = {}
+        queryParamStrings.forEach(str => {
+          const split = str.split('=')
+          if(split.length < 2) return
+          query[split[0]] = split[1]
+        })
         colorClouds({
-          bloomDecayMax: 5,
-          bloomFactor: 3,
-          bloomInitial: 250,
-          bloomOdds: 75,
-          bloomSpreadOdds: 20,
-          boxSize: 15,
-          colorDriftFactor: 5,
+          bloomDecayMax: query.bloomDecayMax || 5,
+          bloomFactor: query.bloomFactor || 3,
+          bloomInitial: query.bloomInitial || 250,
+          bloomOdds: query.bloomOdds || 75,
+          bloomSpreadOdds: query.bloomSpreadOdds || 20,
+          boxSize: query.boxSize || 15,
+          colorDriftFactor: query.colorDriftFactor || 5,
           elementId: 'color-clouds',
-          frameDelay: 100,
+          frameDelay: query.frameDelay || 100,
         })
       }
       if(document.readyState === 'complete') {
